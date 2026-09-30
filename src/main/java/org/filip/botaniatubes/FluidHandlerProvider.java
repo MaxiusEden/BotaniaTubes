@@ -1,4 +1,3 @@
-// FluidHandlerProvider.java
 package org.filip.botaniatubes;
 
 import net.minecraft.core.Direction;
@@ -7,24 +6,23 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FluidHandlerProvider implements ICapabilityProvider {
 
     private final LazyOptional<IFluidHandler> fluidHandler;
 
-    public FluidHandlerProvider(LazyOptional<IFluidHandler> fluidHandler) {
-        this.fluidHandler = fluidHandler;
+    public FluidHandlerProvider(IFluidHandler handler) {
+        this.fluidHandler = LazyOptional.of(() -> handler);
     }
 
-    @Nonnull
+    public void invalidate() {
+        fluidHandler.invalidate();
+    }
+
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction side) {
-        if (capability == ForgeCapabilities.FLUID_HANDLER) {
-            return fluidHandler.cast();
-        }
-        return LazyOptional.empty();
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
+        return ForgeCapabilities.FLUID_HANDLER.orEmpty(capability, fluidHandler);
     }
 }
