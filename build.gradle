@@ -25,6 +25,9 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             args '-mixin.config=botaniatubes.mixins.json'
 
             mods {
@@ -35,9 +38,14 @@ minecraft {
         }
 
         client {
+            workingDirectory project.file(project.findProperty('pasta') ?: 'run')
+            if (project.hasProperty('jogador')) {
+                args '--username', project.property('jogador')
+            }
         }
 
         server {
+            workingDirectory project.file('run-server')
             args '--nogui'
         }
     }
@@ -48,11 +56,25 @@ repositories {
     maven { url = 'https://maven.minecraftforge.net/' }
     maven { url = 'https://modmaven.dev/' }
     maven { url = 'https://maven.blamejared.com' }
+    maven { url = 'https://maven.theillusivec4.top/' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
 }
 
+def teste = project.hasProperty('teste')
+
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    implementation fg.deobf("vazkii.botania:Botania:${botania_version}")
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${teste ? teste_forge_version : forge_version}"
+    implementation fg.deobf("vazkii.botania:Botania:${teste ? teste_botania_version : botania_version}")
+
+    if (teste) {
+        runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${teste_patchouli_version}")
+        runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${teste_curios_version}")
+        runtimeOnly fg.deobf("maven.modrinth:jade:${teste_jade_version}")
+        runtimeOnly fg.deobf("mekanism:Mekanism:${teste_mekanism_version}")
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

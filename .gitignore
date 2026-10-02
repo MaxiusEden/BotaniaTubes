@@ -2,6 +2,8 @@
 build/
 run/
 run-data/
+run-client2/
+run-server/
 out/
 bin/
 .idea/
